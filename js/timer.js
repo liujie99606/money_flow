@@ -30,14 +30,14 @@ const TimerManager = {
     // 计算当前工作状态和进度
     calculateWorkStatus(config) {
         const currentTimeDecimal = this.getCurrentTimeDecimal();
-        const { startTime, endTime, hourlyRate } = config;
+        const { startTime, endTime, hourlyRate, calculatedWorkHours } = config;
         
         // 处理跨天的情况
         const isWorkDayCrossing = endTime < startTime;
         const currentTimeAdjusted = currentTimeDecimal;
         
         // 计算工作总时长（小时）
-        const calculatedWorkHours = isWorkDayCrossing ? 
+        const calculatedWorkHoursValue = isWorkDayCrossing ? 
             (24 - startTime) + endTime : 
             endTime - startTime;
         
@@ -57,9 +57,9 @@ const TimerManager = {
                 }
                 
                 // 计算初始进度
-                this.data.initialWorkProgress = (workedHours / calculatedWorkHours) * 100;
+                this.data.initialWorkProgress = (workedHours / calculatedWorkHoursValue) * 100;
                 
-                // 计算已经赚取的金额
+                // 计算已经赚取的金额 - 使用传入的每小时收入
                 this.data.currentEarnings = hourlyRate * workedHours;
                 
                 // 记录已工作的秒数
@@ -75,9 +75,9 @@ const TimerManager = {
                     this.data.workStatus = 'after_work';
                     this.data.initialWorkProgress = 100;
                     // 已结束工作，获得全部收入
-                    this.data.currentEarnings = hourlyRate * calculatedWorkHours;
+                    this.data.currentEarnings = hourlyRate * calculatedWorkHoursValue;
                     // 记录全部工作时间
-                    this.data.initialWorkedSeconds = Math.floor(calculatedWorkHours * 3600);
+                    this.data.initialWorkedSeconds = Math.floor(calculatedWorkHoursValue * 3600);
                 }
             }
         } else {
@@ -90,9 +90,9 @@ const TimerManager = {
                 const workedHours = currentTimeAdjusted - startTime;
                 
                 // 计算初始进度
-                this.data.initialWorkProgress = (workedHours / calculatedWorkHours) * 100;
+                this.data.initialWorkProgress = (workedHours / calculatedWorkHoursValue) * 100;
                 
-                // 计算已经赚取的金额
+                // 计算已经赚取的金额 - 使用传入的每小时收入
                 this.data.currentEarnings = hourlyRate * workedHours;
                 
                 // 记录已工作的秒数
@@ -108,9 +108,9 @@ const TimerManager = {
                 this.data.workStatus = 'after_work';
                 this.data.initialWorkProgress = 100;
                 // 已结束工作，获得全部收入
-                this.data.currentEarnings = hourlyRate * calculatedWorkHours;
+                this.data.currentEarnings = hourlyRate * calculatedWorkHoursValue;
                 // 记录全部工作时间
-                this.data.initialWorkedSeconds = Math.floor(calculatedWorkHours * 3600);
+                this.data.initialWorkedSeconds = Math.floor(calculatedWorkHoursValue * 3600);
             }
         }
         
@@ -119,7 +119,7 @@ const TimerManager = {
         this.data.countUp.value = this.data.currentEarnings;
         
         // 计算总预期收入
-        this.data.totalExpectedEarnings = hourlyRate * calculatedWorkHours;
+        this.data.totalExpectedEarnings = hourlyRate * calculatedWorkHoursValue;
         
         return {
             workStatus: this.data.workStatus,
@@ -187,9 +187,10 @@ const TimerManager = {
         const deltaSeconds = (now - this.data.currentTime) / 1000;
         // 更新当前时间
         this.data.currentTime = now;
-        // 累加总经过时间 - 仅在工作中状态下增加
+        // 累加总经过时间 - 仅在工作中状态下增加，使用小数累加而不是舍弃小数部分
         if (this.data.workStatus === 'working') {
-            this.data.elapsedTime += Math.floor(deltaSeconds);
+            // 使用小数累加，在 formatTime 时才取整
+            this.data.elapsedTime += deltaSeconds;
         }
         
         // 如果初始状态是正在工作，继续计算收入增长
@@ -253,9 +254,11 @@ const TimerManager = {
     
     // 格式化时间显示（转换秒到 时:分:秒）
     formatTime(seconds) {
-        const h = Math.floor(seconds / 3600);
-        const m = Math.floor((seconds % 3600) / 60);
-        const s = seconds % 60;
+        // 先将秒数转为整数
+        const totalSeconds = Math.floor(seconds);
+        const h = Math.floor(totalSeconds / 3600);
+        const m = Math.floor((totalSeconds % 3600) / 60);
+        const s = totalSeconds % 60;
         
         return [
             h.toString().padStart(2, '0'),

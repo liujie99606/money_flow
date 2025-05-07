@@ -38,16 +38,13 @@ const AppConfig = {
     // 可用的薪资类型配置
     salaryTypes: {
         'monthly': {
-            label: '月薪 (元/月)',
-            hoursPerPeriod: 21.75 * 8 // 月薪时期望的工作小时数
+            label: '月薪 (元/月)'
         },
         'daily': {
-            label: '日薪 (元/天)',
-            hoursPerPeriod: 8 // 日薪时期望的工作小时数
+            label: '日薪 (元/天)'
         },
         'hourly': {
-            label: '时薪 (元/小时)',
-            hoursPerPeriod: 1 // 时薪本身就是以小时计算
+            label: '时薪 (元/小时)'
         }
     }
 }; 

@@ -72,7 +72,16 @@ const app = Vue.createApp({
             if (!salaryType) return amount; // 默认为时薪
             
             // 转换为时薪
-            return amount / salaryType.hoursPerPeriod;
+            if (type === 'monthly') {
+                // 月薪：月薪/(每月工作日*每日工作小时数)
+                return amount / 21.75 / this.calculatedWorkHours;
+            } else if (type === 'daily') {
+                // 日薪：日薪/每日工作小时数
+                return amount / this.calculatedWorkHours;
+            } else {
+                // 时薪：直接返回
+                return amount;
+            }
         },
         
         // 格式化后的收入显示
@@ -164,9 +173,8 @@ const app = Vue.createApp({
             
             // 创建UI更新定时器，每秒更新显示
             this.uiUpdateInterval = setInterval(() => {
-                // 已工作时长每秒手动强制更新
-                document.querySelector('.stats-grid .stat-box:first-child .stat-value').textContent = 
-                    this.formatTime(this.totalWorkedTime);
+                // 使用统一的方法更新工作时长显示
+                this.updateWorkTimeDisplay();
             }, 1000);
         },
         
@@ -192,7 +200,12 @@ const app = Vue.createApp({
             this.initialWorkedSeconds = state.initialWorkedSeconds;
             this.totalExpectedEarnings = state.totalExpectedEarnings;
             
-            // 手动更新已工作时长显示
+            // 确保每次更新时都更新已工作时长显示
+            this.updateWorkTimeDisplay();
+        },
+        
+        // 单独封装更新工作时长显示的方法
+        updateWorkTimeDisplay() {
             const workedTimeElement = document.querySelector('.stats-grid .stat-box:first-child .stat-value');
             if (workedTimeElement) {
                 workedTimeElement.textContent = this.formatTime(this.totalWorkedTime);
