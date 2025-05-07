@@ -15,6 +15,7 @@ body {
     animation: gradientBG 15s ease infinite;
     min-height: 100vh;
     display: flex;
+    flex-direction: column;
     align-items: center;
     justify-content: center;
     color: var(--text-color);
@@ -408,4 +409,55 @@ body {
 .current-time-display:hover {
     background: rgba(255, 255, 255, 0.2);
     box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+}
+
+/* GitHub链接样式 */
+.github-link {
+    display: inline-flex;
+    align-items: center;
+    color: rgba(255, 255, 255, 0.7);
+    text-decoration: none;
+    transition: color 0.3s ease;
+}
+
+.github-link svg {
+    margin-right: 8px;
+    fill: currentColor;
+}
+
+.github-link:hover {
+    color: var(--accent-color);
+}
+
+footer {
+    background: rgba(0, 0, 0, 0.2);
+    backdrop-filter: blur(5px);
+    border-radius: 12px;
+    max-width: 800px;
+    margin: 0 auto;
+    position: relative;
+    width: 100%;
+    z-index: 10;
+}
+
+@media (max-width: 768px) {
+    .col-md-6 {
+        margin-bottom: 15px;
+    }
+    
+    .glass-panel {
+        padding: 20px;
+    }
+    
+    .title {
+        font-size: 1.5rem;
+    }
+    
+    .stats-grid {
+        grid-template-columns: 1fr;
+    }
+    
+    .earning-value {
+        font-size: 3rem;
+    }
 } 
