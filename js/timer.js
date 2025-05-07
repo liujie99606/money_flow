@@ -247,8 +247,54 @@ const TimerManager = {
                 systemTime: this.data.systemTime,
                 workStatus: this.data.workStatus,
                 initialWorkedSeconds: this.data.initialWorkedSeconds,
-                totalExpectedEarnings: this.data.totalExpectedEarnings
+                totalExpectedEarnings: this.data.totalExpectedEarnings,
+                timeUntilEnd: this.getTimeUntilEnd(config)
             });
+        }
+    },
+    
+    // 计算距离下班还剩多少时间（秒）
+    getTimeUntilEnd(config) {
+        const { endTime } = config;
+        
+        // 如果已经下班，返回0
+        if (this.data.workStatus === 'after_work') {
+            return 0;
+        }
+        
+        // 获取当前小时和分钟
+        const now = new Date();
+        const currentHour = now.getHours();
+        const currentMinute = now.getMinutes();
+        const currentSecond = now.getSeconds();
+        
+        // 当前时间转换为秒
+        const currentTimeInSeconds = (currentHour * 3600) + (currentMinute * 60) + currentSecond;
+        
+        // 结束时间转换为秒
+        const endHour = Math.floor(endTime);
+        const endMinute = Math.round((endTime - endHour) * 60);
+        const endTimeInSeconds = (endHour * 3600) + (endMinute * 60);
+        
+        // 如果结束时间小于开始时间，说明跨天
+        if (endTime < config.startTime) {
+            // 计算到明天结束时间的剩余秒数
+            if (currentTimeInSeconds < endTimeInSeconds) {
+                // 当前时间小于结束时间，今天就结束
+                return endTimeInSeconds - currentTimeInSeconds;
+            } else {
+                // 当前时间大于结束时间，要到明天才结束
+                return (24 * 3600 - currentTimeInSeconds) + endTimeInSeconds;
+            }
+        } else {
+            // 不跨天的情况
+            if (currentTimeInSeconds < endTimeInSeconds) {
+                // 今天结束
+                return endTimeInSeconds - currentTimeInSeconds;
+            } else {
+                // 已经过了下班时间
+                return 0;
+            }
         }
     },
     

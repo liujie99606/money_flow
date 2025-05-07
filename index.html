@@ -3,13 +3,13 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <meta name="description" content="牛马实时薪资计算器 - 根据月薪/日薪/时薪实时计算您当前已赚取的金额，直观展示工作收益">
-    <meta name="keywords" content="牛马,薪资计算器,实时薪资,工资计算,收入计算,工作时间,薪酬计算">
+    <meta name="description" content="牛马实时薪资计算器 - 根据月薪/日薪实时计算您当前已赚取的金额，直观展示工作收益">
+    <meta name="keywords" content="牛马,薪资计算器,实时薪资,月薪,日薪,工资计算,收入计算,工作时间,薪酬计算">
     <meta name="author" content="liujie99606">
     <meta name="robots" content="index, follow">
     <meta property="og:title" content="牛马实时薪资计算器 | 直观展示您的工作收益">
     <meta property="og:description"
-          content="牛马实时薪资计算器 - 根据您的薪资类型和工作时间，实时计算当前已经赚取的金额，让您直观感受工作收益">
+          content="牛马实时薪资计算器 - 根据您的月薪/日薪和工作时间，实时计算当前已经赚取的金额，让您直观感受工作收益">
     <meta property="og:type" content="website">
     <meta property="og:url" content="https://github.com/liujie99606/money_flow">
     <title>牛马实时薪资计算器 | 直观展示您的工作收益</title>
@@ -26,7 +26,6 @@
 
 <div id="app" class="container">
     <div class="glass-panel">
-        <div class="current-time-display">当前时间：{{ currentTimeFormatted }}</div>
         <h1 class="title animate__animated animate__fadeIn">🐎 牛马实时薪资计算器 💰</h1>
 
         <div v-if="!isRunning" class="setup-form">
@@ -35,7 +34,9 @@
                 <select id="salaryType" class="form-select salary-select" v-model="salaryType">
                     <option value="monthly">月薪</option>
                     <option value="daily">日薪</option>
+                    <!-- 注释掉时薪选项
                     <option value="hourly">时薪</option>
+                    -->
                 </select>
             </div>
 
@@ -98,6 +99,10 @@
                 <div class="stat-box">
                     <div class="stat-label">已工作时长</div>
                     <div class="stat-value">{{ formatTime(totalWorkedTime) }}</div>
+                </div>
+                <div class="stat-box">
+                    <div class="stat-label">下班倒计时</div>
+                    <div class="stat-value">{{ formatTime(timeUntilEnd) }}</div>
                 </div>
                 <div class="stat-box">
                     <div class="stat-label">每秒收入</div>

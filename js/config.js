@@ -26,7 +26,7 @@ function generateTimeOptions() {
 const AppConfig = {
     // 默认配置
     defaults: {
-        salaryType: 'hourly',
+        salaryType: 'monthly',
         salaryAmount: 0,
         startTime: 8,
         endTime: 16,
@@ -43,8 +43,10 @@ const AppConfig = {
         'daily': {
             label: '日薪 (元/天)'
         },
+        /* 注释掉时薪选项
         'hourly': {
             label: '时薪 (元/小时)'
         }
+        */
     }
 }; 

@@ -37,6 +37,9 @@ const app = Vue.createApp({
             workStatus: '',
             initialWorkProgress: 0,
             initialWorkedSeconds: 0,
+            
+            // 新增：下班倒计时
+            timeUntilEnd: 0,
         };
     },
     
@@ -135,6 +138,49 @@ const app = Vue.createApp({
             const minutes = time.getMinutes().toString().padStart(2, '0');
             const seconds = time.getSeconds().toString().padStart(2, '0');
             return `${hours}:${minutes}:${seconds}`;
+        },
+        
+        // 新增：计算下班倒计时
+        timeUntilEnd() {
+            // 如果未在运行状态，返回计算得出的下班前剩余时间
+            if (!this.isRunning) {
+                // 计算工作日结束时间与当前时间的差值
+                const now = new Date();
+                const currentHour = now.getHours();
+                const currentMinute = now.getMinutes();
+                const currentSecond = now.getSeconds();
+                
+                // 当前时间转换为秒
+                const currentTimeInSeconds = (currentHour * 3600) + (currentMinute * 60) + currentSecond;
+                
+                // 结束时间转换为秒
+                const endHour = Math.floor(this.endTime);
+                const endMinute = Math.round((this.endTime - endHour) * 60);
+                const endTimeInSeconds = (endHour * 3600) + (endMinute * 60);
+                
+                // 如果结束时间小于开始时间，说明跨天
+                if (this.endTime < this.startTime) {
+                    // 计算到明天结束时间的剩余秒数
+                    if (currentTimeInSeconds < endTimeInSeconds) {
+                        // 当前时间小于结束时间，今天就结束
+                        return endTimeInSeconds - currentTimeInSeconds;
+                    } else {
+                        // 当前时间大于结束时间，要到明天才结束
+                        return (24 * 3600 - currentTimeInSeconds) + endTimeInSeconds;
+                    }
+                } else {
+                    // 不跨天的情况
+                    if (currentTimeInSeconds < endTimeInSeconds) {
+                        // 今天结束
+                        return endTimeInSeconds - currentTimeInSeconds;
+                    } else {
+                        // 已经过了下班时间
+                        return 0;
+                    }
+                }
+            }
+            
+            return this.timeUntilEnd || 0;
         }
     },
     
@@ -199,6 +245,7 @@ const app = Vue.createApp({
             this.workStatus = state.workStatus;
             this.initialWorkedSeconds = state.initialWorkedSeconds;
             this.totalExpectedEarnings = state.totalExpectedEarnings;
+            this.timeUntilEnd = state.timeUntilEnd;  // 新增：下班倒计时
             
             // 确保每次更新时都更新已工作时长显示
             this.updateWorkTimeDisplay();
