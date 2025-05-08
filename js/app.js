@@ -21,7 +21,7 @@ const app = Vue.createApp({
             elapsedTime: 0,
             
             // 当前系统时间
-            systemTime: new Date(),
+            systemTime: dayjs(),
             
             // 计算值
             currentEarnings: 0,
@@ -134,10 +134,7 @@ const app = Vue.createApp({
         // 格式化显示当前时间
         currentTimeFormatted() {
             const time = this.systemTime;
-            const hours = time.getHours().toString().padStart(2, '0');
-            const minutes = time.getMinutes().toString().padStart(2, '0');
-            const seconds = time.getSeconds().toString().padStart(2, '0');
-            return `${hours}:${minutes}:${seconds}`;
+            return time.format('HH:mm:ss');
         },
         
         // 新增：计算下班倒计时
@@ -145,10 +142,10 @@ const app = Vue.createApp({
             // 如果未在运行状态，返回计算得出的下班前剩余时间
             if (!this.isRunning) {
                 // 计算工作日结束时间与当前时间的差值
-                const now = new Date();
-                const currentHour = now.getHours();
-                const currentMinute = now.getMinutes();
-                const currentSecond = now.getSeconds();
+                const now = dayjs();
+                const currentHour = now.hour();
+                const currentMinute = now.minute();
+                const currentSecond = now.second();
                 
                 // 当前时间转换为秒
                 const currentTimeInSeconds = (currentHour * 3600) + (currentMinute * 60) + currentSecond;
@@ -299,7 +296,7 @@ const app = Vue.createApp({
         
         // 创建系统时间更新定时器，每秒更新一次
         setInterval(() => {
-            this.systemTime = new Date();
+            this.systemTime = dayjs();
         }, 1000);
     }
 });

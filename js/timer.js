@@ -9,7 +9,7 @@ const TimerManager = {
         currentTime: null,
         elapsedTime: 0,
         timerInterval: null,
-        systemTime: new Date(),
+        systemTime: dayjs(),
         currentEarnings: 0,
         totalExpectedEarnings: 0,
         lastCoinMilestone: 0,
@@ -21,9 +21,9 @@ const TimerManager = {
     
     // 获取当前小时和分钟，转换为小时数（包含小数部分）
     getCurrentTimeDecimal() {
-        const now = new Date();
-        const hour = now.getHours();
-        const minute = now.getMinutes();
+        const now = dayjs();
+        const hour = now.hour();
+        const minute = now.minute();
         return hour + (minute / 60);
     },
     
@@ -136,7 +136,7 @@ const TimerManager = {
         const { hourlyRate, calculatedWorkHours } = config;
         
         // 初始化定时器相关变量
-        this.data.timerStartTime = new Date().getTime();
+        this.data.timerStartTime = dayjs().valueOf();
         this.data.currentTime = this.data.timerStartTime;
         this.data.elapsedTime = 0;
         this.data.isRunning = true;
@@ -180,9 +180,9 @@ const TimerManager = {
         const { perSecondRate, onUpdate } = config;
         
         // 获取当前时间
-        const now = new Date().getTime();
+        const now = dayjs().valueOf();
         // 更新系统时间
-        this.data.systemTime = new Date();
+        this.data.systemTime = dayjs();
         // 计算这次更新与上次更新之间的时间差（秒）
         const deltaSeconds = (now - this.data.currentTime) / 1000;
         // 更新当前时间
@@ -262,11 +262,11 @@ const TimerManager = {
             return 0;
         }
         
-        // 获取当前小时和分钟
-        const now = new Date();
-        const currentHour = now.getHours();
-        const currentMinute = now.getMinutes();
-        const currentSecond = now.getSeconds();
+        // 使用Day.js处理时间计算
+        const now = dayjs();
+        const currentHour = now.hour();
+        const currentMinute = now.minute();
+        const currentSecond = now.second();
         
         // 当前时间转换为秒
         const currentTimeInSeconds = (currentHour * 3600) + (currentMinute * 60) + currentSecond;
@@ -300,16 +300,16 @@ const TimerManager = {
     
     // 格式化时间显示（转换秒到 时:分:秒）
     formatTime(seconds) {
-        // 先将秒数转为整数
-        const totalSeconds = Math.floor(seconds);
-        const h = Math.floor(totalSeconds / 3600);
-        const m = Math.floor((totalSeconds % 3600) / 60);
-        const s = totalSeconds % 60;
+        // 使用Day.js的duration格式化时间
+        const duration = dayjs.duration(seconds, 'seconds');
+        const hours = Math.floor(duration.asHours());
+        const minutes = duration.minutes();
+        const secs = duration.seconds();
         
         return [
-            h.toString().padStart(2, '0'),
-            m.toString().padStart(2, '0'),
-            s.toString().padStart(2, '0')
+            hours.toString().padStart(2, '0'),
+            minutes.toString().padStart(2, '0'),
+            secs.toString().padStart(2, '0')
         ].join(':');
     },
     
