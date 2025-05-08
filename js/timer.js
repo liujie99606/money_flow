@@ -24,7 +24,7 @@ const TimerManager = {
         const now = dayjs();
         const hour = now.hour();
         const minute = now.minute();
-        return hour + (minute / 60);
+        return new Decimal(hour).plus(new Decimal(minute).dividedBy(60)).toNumber();
     },
     
     // 计算当前工作状态和进度
@@ -37,9 +37,12 @@ const TimerManager = {
         const currentTimeAdjusted = currentTimeDecimal;
         
         // 计算工作总时长（小时）
-        const calculatedWorkHoursValue = isWorkDayCrossing ? 
-            (24 - startTime) + endTime : 
-            endTime - startTime;
+        let calculatedWorkHoursValue;
+        if (isWorkDayCrossing) {
+            calculatedWorkHoursValue = new Decimal(24).minus(startTime).plus(endTime).toNumber();
+        } else {
+            calculatedWorkHoursValue = new Decimal(endTime).minus(startTime).toNumber();
+        }
         
         // 判断工作状态
         if (isWorkDayCrossing) {
@@ -51,19 +54,19 @@ const TimerManager = {
                 // 计算已工作时间比例
                 let workedHours;
                 if (currentTimeAdjusted >= startTime) {
-                    workedHours = currentTimeAdjusted - startTime;
+                    workedHours = new Decimal(currentTimeAdjusted).minus(startTime).toNumber();
                 } else {
-                    workedHours = (24 - startTime) + currentTimeAdjusted;
+                    workedHours = new Decimal(24).minus(startTime).plus(currentTimeAdjusted).toNumber();
                 }
                 
                 // 计算初始进度
-                this.data.initialWorkProgress = (workedHours / calculatedWorkHoursValue) * 100;
+                this.data.initialWorkProgress = new Decimal(workedHours).dividedBy(calculatedWorkHoursValue).times(100).toNumber();
                 
                 // 计算已经赚取的金额 - 使用传入的每小时收入
-                this.data.currentEarnings = hourlyRate * workedHours;
+                this.data.currentEarnings = new Decimal(hourlyRate).times(workedHours).toNumber();
                 
                 // 记录已工作的秒数
-                this.data.initialWorkedSeconds = Math.floor(workedHours * 3600);
+                this.data.initialWorkedSeconds = new Decimal(workedHours).times(3600).floor().toNumber();
             } else {
                 // 不在工作时间
                 if (currentTimeAdjusted < startTime && currentTimeAdjusted >= endTime) {
@@ -75,9 +78,9 @@ const TimerManager = {
                     this.data.workStatus = 'after_work';
                     this.data.initialWorkProgress = 100;
                     // 已结束工作，获得全部收入
-                    this.data.currentEarnings = hourlyRate * calculatedWorkHoursValue;
+                    this.data.currentEarnings = new Decimal(hourlyRate).times(calculatedWorkHoursValue).toNumber();
                     // 记录全部工作时间
-                    this.data.initialWorkedSeconds = Math.floor(calculatedWorkHoursValue * 3600);
+                    this.data.initialWorkedSeconds = new Decimal(calculatedWorkHoursValue).times(3600).floor().toNumber();
                 }
             }
         } else {
@@ -87,16 +90,16 @@ const TimerManager = {
                 this.data.workStatus = 'working';
                 
                 // 计算已工作时间
-                const workedHours = currentTimeAdjusted - startTime;
+                const workedHours = new Decimal(currentTimeAdjusted).minus(startTime).toNumber();
                 
                 // 计算初始进度
-                this.data.initialWorkProgress = (workedHours / calculatedWorkHoursValue) * 100;
+                this.data.initialWorkProgress = new Decimal(workedHours).dividedBy(calculatedWorkHoursValue).times(100).toNumber();
                 
                 // 计算已经赚取的金额 - 使用传入的每小时收入
-                this.data.currentEarnings = hourlyRate * workedHours;
+                this.data.currentEarnings = new Decimal(hourlyRate).times(workedHours).toNumber();
                 
                 // 记录已工作的秒数
-                this.data.initialWorkedSeconds = Math.floor(workedHours * 3600);
+                this.data.initialWorkedSeconds = new Decimal(workedHours).times(3600).floor().toNumber();
             } else if (currentTimeAdjusted < startTime) {
                 // 还未上班
                 this.data.workStatus = 'before_work';
@@ -108,9 +111,9 @@ const TimerManager = {
                 this.data.workStatus = 'after_work';
                 this.data.initialWorkProgress = 100;
                 // 已结束工作，获得全部收入
-                this.data.currentEarnings = hourlyRate * calculatedWorkHoursValue;
+                this.data.currentEarnings = new Decimal(hourlyRate).times(calculatedWorkHoursValue).toNumber();
                 // 记录全部工作时间
-                this.data.initialWorkedSeconds = Math.floor(calculatedWorkHoursValue * 3600);
+                this.data.initialWorkedSeconds = new Decimal(calculatedWorkHoursValue).times(3600).floor().toNumber();
             }
         }
         
@@ -119,7 +122,7 @@ const TimerManager = {
         this.data.countUp.value = this.data.currentEarnings;
         
         // 计算总预期收入
-        this.data.totalExpectedEarnings = hourlyRate * calculatedWorkHoursValue;
+        this.data.totalExpectedEarnings = new Decimal(hourlyRate).times(calculatedWorkHoursValue).toNumber();
         
         return {
             workStatus: this.data.workStatus,
@@ -184,20 +187,20 @@ const TimerManager = {
         // 更新系统时间
         this.data.systemTime = dayjs();
         // 计算这次更新与上次更新之间的时间差（秒）
-        const deltaSeconds = (now - this.data.currentTime) / 1000;
+        const deltaSeconds = new Decimal(now).minus(this.data.currentTime).dividedBy(1000).toNumber();
         // 更新当前时间
         this.data.currentTime = now;
         // 累加总经过时间 - 仅在工作中状态下增加，使用小数累加而不是舍弃小数部分
         if (this.data.workStatus === 'working') {
             // 使用小数累加，在 formatTime 时才取整
-            this.data.elapsedTime += deltaSeconds;
+            this.data.elapsedTime = new Decimal(this.data.elapsedTime).plus(deltaSeconds).toNumber();
         }
         
         // 如果初始状态是正在工作，继续计算收入增长
         if (this.data.workStatus === 'working') {
             // 只计算这次更新产生的收入增量
-            const incrementalEarnings = perSecondRate * deltaSeconds;
-            this.data.currentEarnings += incrementalEarnings;
+            const incrementalEarnings = new Decimal(perSecondRate).times(deltaSeconds).toNumber();
+            this.data.currentEarnings = new Decimal(this.data.currentEarnings).plus(incrementalEarnings).toNumber();
         }
         
         // 检查是否达到新的整元里程碑
@@ -269,28 +272,31 @@ const TimerManager = {
         const currentSecond = now.second();
         
         // 当前时间转换为秒
-        const currentTimeInSeconds = (currentHour * 3600) + (currentMinute * 60) + currentSecond;
+        const currentTimeInSeconds = new Decimal(currentHour).times(3600)
+            .plus(new Decimal(currentMinute).times(60))
+            .plus(currentSecond);
         
         // 结束时间转换为秒
         const endHour = Math.floor(endTime);
         const endMinute = Math.round((endTime - endHour) * 60);
-        const endTimeInSeconds = (endHour * 3600) + (endMinute * 60);
+        const endTimeInSeconds = new Decimal(endHour).times(3600)
+            .plus(new Decimal(endMinute).times(60));
         
         // 如果结束时间小于开始时间，说明跨天
         if (endTime < config.startTime) {
             // 计算到明天结束时间的剩余秒数
-            if (currentTimeInSeconds < endTimeInSeconds) {
+            if (currentTimeInSeconds.lessThan(endTimeInSeconds)) {
                 // 当前时间小于结束时间，今天就结束
-                return endTimeInSeconds - currentTimeInSeconds;
+                return endTimeInSeconds.minus(currentTimeInSeconds).toNumber();
             } else {
                 // 当前时间大于结束时间，要到明天才结束
-                return (24 * 3600 - currentTimeInSeconds) + endTimeInSeconds;
+                return new Decimal(24 * 3600).minus(currentTimeInSeconds).plus(endTimeInSeconds).toNumber();
             }
         } else {
             // 不跨天的情况
-            if (currentTimeInSeconds < endTimeInSeconds) {
+            if (currentTimeInSeconds.lessThan(endTimeInSeconds)) {
                 // 今天结束
-                return endTimeInSeconds - currentTimeInSeconds;
+                return endTimeInSeconds.minus(currentTimeInSeconds).toNumber();
             } else {
                 // 已经过了下班时间
                 return 0;
@@ -332,9 +338,13 @@ const TimerManager = {
     getProgressPercentage(calculatedWorkHours) {
         if (!calculatedWorkHours || calculatedWorkHours <= 0) return 0;
         
-        const totalSeconds = calculatedWorkHours * 3600;
-        const percentage = (this.data.elapsedTime / totalSeconds) * 100;
+        const totalSeconds = new Decimal(calculatedWorkHours).times(3600);
+        const percentage = new Decimal(this.data.elapsedTime).dividedBy(totalSeconds).times(100);
+        
         // 加上初始进度
-        return Math.min(100, Math.max(0, (this.data.initialWorkProgress + parseFloat(percentage)).toFixed(1)));
+        const totalPercentage = new Decimal(this.data.initialWorkProgress).plus(percentage);
+        
+        // 确保在0-100之间并保留一位小数
+        return Math.min(100, Math.max(0, totalPercentage.toFixed(1)));
     }
 }; 

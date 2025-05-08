@@ -57,11 +57,14 @@ const app = Vue.createApp({
         // 计算实际工作时长
         calculatedWorkHours() {
             // 如果下班时间小于上班时间，认为是跨天（如早上8点到晚上22点）
-            let hours = this.endTime >= this.startTime ? 
-                this.endTime - this.startTime : 
-                (24 - this.startTime) + this.endTime;
+            let hours;
+            if (this.endTime >= this.startTime) {
+                hours = new Decimal(this.endTime).minus(this.startTime);
+            } else {
+                hours = new Decimal(24).minus(this.startTime).plus(this.endTime);
+            }
             
-            return hours;
+            return hours.toNumber();
         },
         
         // 将用户输入的薪资转换为时薪
@@ -74,37 +77,43 @@ const app = Vue.createApp({
             const salaryType = AppConfig.salaryTypes[type];
             if (!salaryType) return amount; // 默认为时薪
             
-            // 转换为时薪
+            // 转换为时薪，使用Decimal.js处理计算
             if (type === 'monthly') {
                 // 月薪：月薪/(每月工作日*每日工作小时数)
-                return amount / 21.75 / this.calculatedWorkHours;
+                return new Decimal(amount).dividedBy(21.75).dividedBy(this.calculatedWorkHours).toNumber();
             } else if (type === 'daily') {
                 // 日薪：日薪/每日工作小时数
-                return amount / this.calculatedWorkHours;
+                return new Decimal(amount).dividedBy(this.calculatedWorkHours).toNumber();
             } else {
                 // 时薪：直接返回
-                return amount;
+                return parseFloat(amount);
             }
         },
         
         // 格式化后的收入显示
         formattedEarnings() {
-            return this.currentEarnings.toFixed(2);
+            // 使用Decimal.js格式化，确保小数点后两位
+            return new Decimal(this.currentEarnings).toFixed(2);
         },
         
         // 每秒收入
         perSecondRate() {
-            return this.hourlyRate / 3600;
+            // 使用Decimal.js计算每秒收入
+            return new Decimal(this.hourlyRate).dividedBy(3600).toNumber();
         },
         
         // 进度百分比
         progressPercentage() {
             if (this.calculatedWorkHours <= 0) return 0;
             
-            const totalSeconds = this.calculatedWorkHours * 3600;
-            const percentage = (this.elapsedTime / totalSeconds) * 100;
+            const totalSeconds = new Decimal(this.calculatedWorkHours).times(3600);
+            const percentage = new Decimal(this.elapsedTime).dividedBy(totalSeconds).times(100);
+            
             // 加上初始进度
-            return Math.min(100, Math.max(0, (this.initialWorkProgress + parseFloat(percentage)).toFixed(1)));
+            const totalPercentage = new Decimal(this.initialWorkProgress).plus(percentage);
+            
+            // 确保在0-100之间并保留一位小数
+            return Math.min(100, Math.max(0, totalPercentage.toFixed(1)));
         },
         
         // 是否可以开始
@@ -128,7 +137,7 @@ const app = Vue.createApp({
         
         // 总的已工作时间（包括初始已工作时间和计时器记录的时间）
         totalWorkedTime() {
-            return this.initialWorkedSeconds + this.elapsedTime;
+            return new Decimal(this.initialWorkedSeconds).plus(this.elapsedTime).toNumber();
         },
         
         // 格式化显示当前时间
@@ -148,28 +157,31 @@ const app = Vue.createApp({
                 const currentSecond = now.second();
                 
                 // 当前时间转换为秒
-                const currentTimeInSeconds = (currentHour * 3600) + (currentMinute * 60) + currentSecond;
+                const currentTimeInSeconds = new Decimal(currentHour).times(3600)
+                    .plus(new Decimal(currentMinute).times(60))
+                    .plus(currentSecond);
                 
                 // 结束时间转换为秒
                 const endHour = Math.floor(this.endTime);
                 const endMinute = Math.round((this.endTime - endHour) * 60);
-                const endTimeInSeconds = (endHour * 3600) + (endMinute * 60);
+                const endTimeInSeconds = new Decimal(endHour).times(3600)
+                    .plus(new Decimal(endMinute).times(60));
                 
                 // 如果结束时间小于开始时间，说明跨天
                 if (this.endTime < this.startTime) {
                     // 计算到明天结束时间的剩余秒数
-                    if (currentTimeInSeconds < endTimeInSeconds) {
+                    if (currentTimeInSeconds.lessThan(endTimeInSeconds)) {
                         // 当前时间小于结束时间，今天就结束
-                        return endTimeInSeconds - currentTimeInSeconds;
+                        return endTimeInSeconds.minus(currentTimeInSeconds).toNumber();
                     } else {
                         // 当前时间大于结束时间，要到明天才结束
-                        return (24 * 3600 - currentTimeInSeconds) + endTimeInSeconds;
+                        return new Decimal(24 * 3600).minus(currentTimeInSeconds).plus(endTimeInSeconds).toNumber();
                     }
                 } else {
                     // 不跨天的情况
-                    if (currentTimeInSeconds < endTimeInSeconds) {
+                    if (currentTimeInSeconds.lessThan(endTimeInSeconds)) {
                         // 今天结束
-                        return endTimeInSeconds - currentTimeInSeconds;
+                        return endTimeInSeconds.minus(currentTimeInSeconds).toNumber();
                     } else {
                         // 已经过了下班时间
                         return 0;
@@ -287,6 +299,7 @@ const app = Vue.createApp({
         }
     },
     
+    // Vue 3的选项式API中仍然可以使用mounted
     mounted() {
         // 页面加载时，从localStorage加载设置
         this.loadSettings();
