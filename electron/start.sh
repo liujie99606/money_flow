@@ -1,0 +1,3 @@
+#!/bin/bash
+echo "正在启动牛马实时薪资计算器..."
+npm run dev 

@@ -1,0 +1,226 @@
+/* Electron特定样式 */
+.electron-app {
+    /* 无边框窗口样式 */
+    -webkit-app-region: drag;
+}
+
+.electron-app .no-drag {
+    -webkit-app-region: no-drag;
+}
+
+/* 标题栏样式 */
+.title-bar {
+    height: 30px;
+    background: rgba(0, 0, 0, 0.2);
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0 10px;
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    z-index: 1000;
+}
+
+.title-bar .title {
+    font-size: 12px;
+    color: #fff;
+    margin: 0;
+}
+
+.window-controls {
+    display: flex;
+    align-items: center;
+}
+
+.window-control {
+    width: 12px;
+    height: 12px;
+    border-radius: 50%;
+    margin-left: 8px;
+    cursor: pointer;
+    -webkit-app-region: no-drag;
+}
+
+.window-control.close {
+    background-color: #ff5f57;
+}
+
+.window-control.minimize {
+    background-color: #ffbd2e;
+}
+
+.window-control.maximize {
+    background-color: #28ca41;
+}
+
+/* 调整主体内容，为标题栏留出空间 */
+.electron-app .container {
+    padding-top: 40px;
+}
+
+/* 滚动条样式 */
+::-webkit-scrollbar {
+    width: 8px;
+    height: 8px;
+}
+
+::-webkit-scrollbar-track {
+    background: rgba(255, 255, 255, 0.1);
+    border-radius: 10px;
+}
+
+::-webkit-scrollbar-thumb {
+    background: rgba(255, 255, 255, 0.2);
+    border-radius: 10px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+    background: rgba(255, 255, 255, 0.3);
+}
+
+/* 修复样式问题 */
+.glass-panel {
+    backdrop-filter: blur(10px);
+    background: rgba(255, 255, 255, 0.1);
+    border-radius: 20px;
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    box-shadow: 0 25px 45px rgba(0, 0, 0, 0.3);
+    padding: 30px 25px;
+    text-align: center;
+    position: relative;
+    overflow: hidden;
+}
+
+.title {
+    margin-bottom: 25px;
+    font-weight: bold;
+    background: linear-gradient(45deg, #ff3e78, #00d9ff);
+    -webkit-background-clip: text;
+    background-clip: text;
+    color: transparent;
+    letter-spacing: 1px;
+    text-transform: uppercase;
+    position: relative;
+    display: inline-block;
+    font-size: 1.6rem;
+}
+
+.title::after {
+    content: '';
+    position: absolute;
+    left: 25%;
+    bottom: -10px;
+    width: 50%;
+    height: 3px;
+    background: linear-gradient(90deg, #ff3e78, #00d9ff);
+    border-radius: 3px;
+}
+
+.work-status-badge {
+    display: inline-block;
+    padding: 5px 15px;
+    border-radius: 20px;
+    margin: 10px 0;
+    font-size: 0.9rem;
+    font-weight: 600;
+}
+
+.status-working {
+    background: rgba(46, 213, 115, 0.2);
+    color: #2ed573;
+    border: 1px solid rgba(46, 213, 115, 0.3);
+}
+
+.status-before_work {
+    background: rgba(255, 159, 67, 0.2);
+    color: #ff9f43;
+    border: 1px solid rgba(255, 159, 67, 0.3);
+}
+
+.status-after_work {
+    background: rgba(94, 114, 228, 0.2);
+    color: #5e72e4;
+    border: 1px solid rgba(94, 114, 228, 0.3);
+}
+
+.stats-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 12px;
+    margin-top: 20px;
+}
+
+.stat-box {
+    background: rgba(255, 255, 255, 0.1);
+    border-radius: 10px;
+    padding: 10px 8px;
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    transition: all 0.3s ease;
+}
+
+.stat-box:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 10px 20px rgba(0, 0, 0, 0.2);
+    border-color: var(--accent-color);
+}
+
+.stat-label {
+    font-size: 0.9rem;
+    opacity: 0.8;
+    margin-bottom: 5px;
+}
+
+.stat-value {
+    font-size: 1.4rem;
+    font-weight: 600;
+}
+
+/* 粒子样式 */
+.particle {
+    position: absolute;
+    background-color: rgba(255, 255, 255, 0.5);
+    border-radius: 50%;
+    animation: float 15s infinite ease-in-out;
+}
+
+@keyframes float {
+    0%, 100% {
+        transform: translateY(0) translateX(0);
+    }
+    25% {
+        transform: translateY(-20px) translateX(10px);
+    }
+    50% {
+        transform: translateY(-10px) translateX(-15px);
+    }
+    75% {
+        transform: translateY(15px) translateX(5px);
+    }
+}
+
+/* 按钮样式 */
+.btn-primary {
+    background: linear-gradient(45deg, #8a2be2, #00d9ff);
+    border: none;
+    box-shadow: 0 4px 15px rgba(138, 43, 226, 0.3);
+}
+
+.btn-primary:hover {
+    background: linear-gradient(45deg, #00d9ff, #8a2be2);
+    transform: translateY(-2px);
+    box-shadow: 0 8px 20px rgba(138, 43, 226, 0.5);
+}
+
+.btn-danger {
+    background: linear-gradient(45deg, #ff3e78, #ff0844);
+    border: none;
+    box-shadow: 0 4px 15px rgba(255, 62, 120, 0.3);
+}
+
+.btn-danger:hover {
+    background: linear-gradient(45deg, #ff0844, #ff3e78);
+    transform: translateY(-2px);
+    box-shadow: 0 8px 20px rgba(255, 62, 120, 0.5);
+} 

@@ -1,0 +1,54 @@
+{
+  "name": "money-flow",
+  "version": "1.0.0",
+  "description": "牛马实时薪资计算器桌面应用",
+  "main": "main.js",
+  "scripts": {
+    "start": "electron .",
+    "dev": "electron . --env=local",
+    "build-win": "electron-builder --win",
+    "build-mac": "electron-builder --mac",
+    "build-linux": "electron-builder --linux"
+  },
+  "keywords": [
+    "electron",
+    "money-flow",
+    "salary-calculator"
+  ],
+  "author": "liujie99606",
+  "license": "MIT",
+  "devDependencies": {
+    "electron": "^25.0.0",
+    "electron-builder": "^24.4.0"
+  },
+  "dependencies": {},
+  "build": {
+    "appId": "com.liujie.moneyflow",
+    "productName": "牛马实时薪资计算器",
+    "directories": {
+      "output": "out"
+    },
+    "files": [
+      "**/*",
+      "!out/*"
+    ],
+    "win": {
+      "icon": "app/public/images/icon.ico",
+      "target": [
+        "nsis"
+      ]
+    },
+    "mac": {
+      "icon": "app/public/images/icon.icns",
+      "target": [
+        "dmg"
+      ]
+    },
+    "linux": {
+      "icon": "app/public/images/icon.png",
+      "target": [
+        "AppImage"
+      ]
+    }
+  }
+} 

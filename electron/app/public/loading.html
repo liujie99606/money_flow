@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>加载中 - 牛马实时薪资计算器</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(45deg, #111339, #22074f);
+            background-size: 400% 400%;
+            animation: gradientBG 15s ease infinite;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            color: #ffffff;
+            overflow-x: hidden;
+            margin: 0;
+            padding: 20px;
+        }
+        
+        @keyframes gradientBG {
+            0% {
+                background-position: 0% 50%;
+            }
+            50% {
+                background-position: 100% 50%;
+            }
+            100% {
+                background-position: 0% 50%;
+            }
+        }
+        
+        .loader {
+            width: 80px;
+            height: 80px;
+            border-radius: 50%;
+            border: 8px solid rgba(255, 255, 255, 0.1);
+            border-top: 8px solid #00d9ff;
+            animation: spin 1s linear infinite;
+        }
+        
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+        
+        .title {
+            margin-top: 30px;
+            font-weight: bold;
+            background: linear-gradient(45deg, #ff3e78, #00d9ff);
+            -webkit-background-clip: text;
+            background-clip: text;
+            color: transparent;
+            letter-spacing: 1px;
+            text-transform: uppercase;
+            font-size: 1.6rem;
+        }
+    </style>
+</head>
+<body>
+    <div class="loader"></div>
+    <h1 class="title">牛马实时薪资计算器</h1>
+    <p>应用正在加载中，请稍候...</p>
+</body>
+</html> 

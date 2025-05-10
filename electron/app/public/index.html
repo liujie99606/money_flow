@@ -1,0 +1,191 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="牛马实时薪资计算器 - 根据月薪/日薪实时计算您当前已赚取的金额，直观展示工作收益">
+    <meta name="keywords" content="牛马,薪资计算器,实时薪资,月薪,日薪,工资计算,收入计算,工作时间,薪酬计算">
+    <meta name="author" content="liujie99606">
+    <title>牛马实时薪资计算器 | 直观展示您的工作收益</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css">
+    <link rel="stylesheet" href="css/style.css">
+    <link rel="stylesheet" href="css/electron.css">
+    <script src="https://cdn.jsdelivr.net/npm/vue@3.2.47/dist/vue.global.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/gsap@3.11.4/dist/gsap.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/dayjs@1.11.9/dayjs.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/dayjs@1.11.9/plugin/duration.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/dayjs@1.11.9/plugin/relativeTime.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/decimal.js@10.4.3/decimal.min.js"></script>
+    <script>
+        dayjs.extend(window.dayjs_plugin_duration);
+        dayjs.extend(window.dayjs_plugin_relativeTime);
+    </script>
+</head>
+<body class="electron-app">
+<!-- 标题栏 (仅在Electron环境中显示) -->
+<div class="title-bar" id="electron-title-bar" style="display: none;">
+    <div class="title">牛马实时薪资计算器</div>
+    <div class="window-controls">
+        <div class="window-control minimize" id="minimize-btn"></div>
+        <div class="window-control maximize" id="maximize-btn"></div>
+        <div class="window-control close" id="close-btn"></div>
+    </div>
+</div>
+
+<div id="particles-container"></div>
+<div id="coins-container"></div>
+
+<div id="app" class="container">
+    <div class="glass-panel">
+        <h1 class="title animate__animated animate__fadeIn">🐎 牛马实时薪资计算器 💰</h1>
+
+        <div v-if="!isRunning" class="setup-form no-drag">
+            <div class="form-group mb-3">
+                <label for="salaryType" class="form-label">薪资类型</label>
+                <select id="salaryType" class="form-select salary-select" v-model="salaryType">
+                    <option value="monthly">月薪</option>
+                    <option value="daily">日薪</option>
+                    <!-- 注释掉时薪选项
+                    <option value="hourly">时薪</option>
+                    -->
+                </select>
+            </div>
+
+            <div class="form-group mb-3">
+                <label :for="salaryInputId" class="form-label">{{ salaryLabel }}</label>
+                <input type="number" :id="salaryInputId" class="form-control" v-model.number="salaryAmount" min="0"
+                       step="0.01">
+            </div>
+
+            <div class="row mb-3">
+                <div class="col-md-6 mb-2 mb-md-0">
+                    <div class="form-group">
+                        <label for="startTime" class="form-label">上班时间</label>
+                        <select id="startTime" class="form-select time-select" v-model="startTime">
+                            <option v-for="time in timeOptions" :key="`start-${time.value}`" :value="time.value">
+                                {{ time.label }}
+                            </option>
+                        </select>
+                    </div>
+                </div>
+                <div class="col-md-6">
+                    <div class="form-group">
+                        <label for="endTime" class="form-label">下班时间</label>
+                        <select id="endTime" class="form-select time-select" v-model="endTime">
+                            <option v-for="time in timeOptions" :key="`end-${time.value}`" :value="time.value">
+                                {{ time.label }}
+                            </option>
+                        </select>
+                    </div>
+                </div>
+            </div>
+
+            <div class="work-hours-info mb-3">
+                <div class="info-label">每日工作时长：</div>
+                <div class="info-value">{{ calculatedWorkHours }} 小时</div>
+            </div>
+
+            <button @click="startTimer" class="btn btn-primary btn-glow" :disabled="!canStart">开始计时</button>
+        </div>
+
+        <div v-else class="salary-display no-drag">
+            <div class="current-earning-container">
+                <h2 class="mb-2">当前已赚取</h2>
+                <div class="earning-value">¥{{ formattedEarnings }}</div>
+            </div>
+
+            <div class="work-status-badge" :class="'status-' + workStatus">
+                {{ workStatusText }}
+            </div>
+
+            <div class="progress-container mb-3">
+                <div class="progress" style="height: 20px;">
+                    <div class="progress-bar progress-bar-striped progress-bar-animated"
+                         :style="{ width: progressPercentage + '%' }"></div>
+                </div>
+                <div class="progress-text">{{ progressPercentage }}%</div>
+            </div>
+
+            <div class="stats-grid">
+                <div class="stat-box">
+                    <div class="stat-label">已工作时长</div>
+                    <div class="stat-value">{{ formatTime(totalWorkedTime) }}</div>
+                </div>
+                <div class="stat-box">
+                    <div class="stat-label">下班倒计时</div>
+                    <div class="stat-value">{{ formatTime(timeUntilEnd) }}</div>
+                </div>
+                <div class="stat-box">
+                    <div class="stat-label">每秒收入</div>
+                    <div class="stat-value">¥{{ perSecondRate.toFixed(4) }}/秒</div>
+                </div>
+                <div class="stat-box">
+                    <div class="stat-label">预计总收入</div>
+                    <div class="stat-value">¥{{ totalExpectedEarnings.toFixed(2) }}</div>
+                </div>
+            </div>
+
+            <button @click="stopTimer" class="btn btn-danger btn-glow mt-4">下班</button>
+        </div>
+    </div>
+</div>
+
+<footer class="text-center mt-4 py-3">
+    <p>
+        <a href="https://github.com/liujie99606/money_flow" target="_blank" class="github-link no-drag">
+            <svg height="24" width="24" aria-hidden="true" viewBox="0 0 16 16" version="1.1">
+                <path fill-rule="evenodd"
+                      d="M8 0C3.58 0 0 3.58 0 8c0 3.54 2.29 6.53 5.47 7.59.4.07.55-.17.55-.38 0-.19-.01-.82-.01-1.49-2.01.37-2.53-.49-2.69-.94-.09-.23-.48-.94-.82-1.13-.28-.15-.68-.52-.01-.53.63-.01 1.08.58 1.23.82.72 1.21 1.87.87 2.33.66.07-.52.28-.87.51-1.07-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82.64-.18 1.32-.27 2-.27.68 0 1.36.09 2 .27 1.53-1.04 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.27.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48 0 1.07-.01 1.93-.01 2.2 0 .21.15.46.55.38A8.013 8.013 0 0016 8c0-4.42-3.58-8-8-8z"></path>
+            </svg>
+            GitHub: liujie99606/money_flow
+        </a>
+    </p>
+</footer>
+
+<!-- 按顺序引入JS文件 -->
+<script src="js/config.js"></script>
+<script src="js/storage.js"></script>
+<script src="js/effects.js"></script>
+<script src="js/timer.js"></script>
+<script src="js/electron-ipc.js"></script>
+<script src="js/app.js"></script>
+
+<!-- Electron 窗口控制 -->
+<script>
+    // 检查是否在Electron环境中
+    document.addEventListener('DOMContentLoaded', function() {
+        if (window.electron) {
+            // 显示标题栏
+            document.getElementById('electron-title-bar').style.display = 'flex';
+            
+            // 窗口控制按钮
+            document.getElementById('minimize-btn').addEventListener('click', () => {
+                window.electron.ipcRenderer.send('window-minimize');
+            });
+            
+            document.getElementById('maximize-btn').addEventListener('click', () => {
+                window.electron.ipcRenderer.send('window-maximize');
+            });
+            
+            document.getElementById('close-btn').addEventListener('click', () => {
+                window.electron.ipcRenderer.send('window-close');
+            });
+            
+            // 配置加载回调
+            window.onConfigLoaded = function(config) {
+                // 将配置应用到Vue应用
+                if (window.app && config) {
+                    window.app.salaryType = config.salaryType || 'monthly';
+                    window.app.salaryAmount = config.salaryAmount || 5000;
+                    window.app.startTime = config.startTime || 9;
+                    window.app.endTime = config.endTime || 18;
+                    window.app.workDays = config.workDays || 22;
+                }
+            };
+        }
+    });
+</script>
+</body>
+</html> 
