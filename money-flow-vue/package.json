@@ -1,0 +1,43 @@
+{
+  "name": "money-flow-vue",
+  "private": true,
+  "version": "1.0.0",
+  "type": "module",
+  "description": "牛马实时薪资计算器 - 基于Vue3的实时薪资计算工具",
+  "author": "liujie99606",
+  "license": "MIT",
+  "keywords": [
+    "vue3",
+    "vite",
+    "salary",
+    "calculator",
+    "timer",
+    "money"
+  ],
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/liujie99606/money_flow"
+  },
+  "scripts": {
+    "dev": "vite",
+    "build": "vite build",
+    "preview": "vite preview",
+    "lint": "eslint --ext .js,.vue src"
+  },
+  "dependencies": {
+    "canvas-confetti": "^1.9.3",
+    "dayjs": "^1.11.13",
+    "decimal.js": "^10.5.0",
+    "gsap": "^3.13.0",
+    "sass": "^1.87.0",
+    "vue": "^3.5.13"
+  },
+  "devDependencies": {
+    "@vitejs/plugin-vue": "^5.2.3",
+    "vite": "^6.3.5"
+  },
+  "engines": {
+    "node": ">=16.0.0",
+    "npm": ">=8.0.0"
+  }
+}
