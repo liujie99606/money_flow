@@ -1,53 +1,81 @@
 <template>
   <div class="setup-form">
-    <div class="form-group mb-3">
-      <label for="salaryType" class="form-label">薪资类型</label>
-      <select id="salaryType" class="form-select salary-select" v-model="salaryType">
-        <option v-for="(type, key) in salaryTypes" :key="key" :value="key">
-          {{ type.label }}
-        </option>
-      </select>
-    </div>
+    <el-form :model="formData" label-position="top">
+      <el-form-item label="薪资类型">
+        <el-select v-model="salaryType" class="w-100">
+          <el-option
+            v-for="(type, key) in salaryTypes"
+            :key="key"
+            :label="type.label"
+            :value="key"
+          />
+        </el-select>
+      </el-form-item>
 
-    <div class="form-group mb-3">
-      <label :for="salaryInputId" class="form-label">{{ salaryLabel }}</label>
-      <input type="number" :id="salaryInputId" class="form-control" v-model.number="salaryAmount" min="0" step="0.01">
-    </div>
+      <el-form-item :label="salaryLabel">
+        <el-input-number
+          v-model="salaryAmount"
+          :min="0"
+          :step="0.01"
+          :precision="2"
+          class="w-100"
+        />
+      </el-form-item>
 
-    <div class="row mb-3">
-      <div class="col-md-6 mb-2 mb-md-0">
-        <div class="form-group">
-          <label for="startTime" class="form-label">上班时间</label>
-          <select id="startTime" class="form-select time-select" v-model="startTime">
-            <option v-for="time in timeOptions" :key="`start-${time.value}`" :value="time.value">
-              {{ time.label }}
-            </option>
-          </select>
-        </div>
-      </div>
-      <div class="col-md-6">
-        <div class="form-group">
-          <label for="endTime" class="form-label">下班时间</label>
-          <select id="endTime" class="form-select time-select" v-model="endTime">
-            <option v-for="time in timeOptions" :key="`end-${time.value}`" :value="time.value">
-              {{ time.label }}
-            </option>
-          </select>
-        </div>
-      </div>
-    </div>
+      <el-row :gutter="12">
+        <el-col :span="12">
+          <el-form-item label="上班时间">
+            <el-select v-model="startTime" class="w-100">
+              <el-option
+                v-for="time in timeOptions"
+                :key="`start-${time.value}`"
+                :label="time.label"
+                :value="time.value"
+              />
+            </el-select>
+          </el-form-item>
+        </el-col>
+        <el-col :span="12">
+          <el-form-item label="下班时间">
+            <el-select v-model="endTime" class="w-100">
+              <el-option
+                v-for="time in timeOptions"
+                :key="`end-${time.value}`"
+                :label="time.label"
+                :value="time.value"
+              />
+            </el-select>
+          </el-form-item>
+        </el-col>
+      </el-row>
 
-    <div class="work-hours-info mb-3">
-      <div class="info-label">每日工作时长：</div>
-      <div class="info-value">{{ calculatedWorkHours }} 小时</div>
-    </div>
+      <el-alert
+        type="info"
+        :closable="false"
+        class="mb-4"
+      >
+        <template #title>
+          <div class="work-hours-info">
+            <div class="info-label">每日工作时长：</div>
+            <div class="info-value">{{ calculatedWorkHours }} 小时</div>
+          </div>
+        </template>
+      </el-alert>
 
-    <button @click="startTimer" class="btn btn-primary btn-glow" :disabled="!canStart">开始计时</button>
+      <el-button
+        type="primary"
+        @click="startTimer"
+        :disabled="!canStart"
+        class="w-100"
+      >
+        开始计时
+      </el-button>
+    </el-form>
   </div>
 </template>
 
 <script>
-import { ref, computed, onMounted } from 'vue';
+import { ref, computed, onMounted, reactive } from 'vue';
 import { AppConfig } from '../config';
 import { StorageUtils } from '../utils/storage';
 import { Decimal } from 'decimal.js';
@@ -57,6 +85,9 @@ export default {
   emits: ['start-timer'],
   
   setup(props, { emit }) {
+    // 表单数据
+    const formData = reactive({});
+    
     // 状态
     const salaryType = ref(AppConfig.defaults.salaryType);
     const salaryAmount = ref(AppConfig.defaults.salaryAmount);
@@ -64,7 +95,6 @@ export default {
     const endTime = ref(AppConfig.defaults.endTime);
     
     // 计算属性
-    const salaryInputId = computed(() => `${salaryType.value}SalaryInput`);
     const salaryLabel = computed(() => AppConfig.salaryTypes[salaryType.value]?.label || '时薪 (元/小时)');
     const timeOptions = computed(() => AppConfig.timeOptions);
     const salaryTypes = computed(() => AppConfig.salaryTypes);
@@ -164,13 +194,13 @@ export default {
     });
     
     return {
+      formData,
       salaryType,
       salaryAmount,
       startTime,
       endTime,
       timeOptions,
       salaryTypes,
-      salaryInputId,
       salaryLabel,
       calculatedWorkHours,
       canStart,
@@ -185,106 +215,28 @@ export default {
   padding: 20px 0;
 }
 
-.form-group {
-  margin-bottom: 15px;
+.w-100 {
+  width: 100%;
 }
 
-.form-control {
-  background-color: rgba(255, 255, 255, 0.1);
-  border: 1px solid rgba(255, 255, 255, 0.2);
-  border-radius: 8px;
-  color: #fff;
-  padding: 8px 12px;
-  transition: all 0.3s ease;
-  
-  &:focus {
-    background-color: rgba(255, 255, 255, 0.15);
-    border-color: var(--accent-color);
-    box-shadow: 0 0 0 3px rgba(0, 217, 255, 0.3);
-    color: #fff;
-  }
+.mb-4 {
+  margin-bottom: 16px;
 }
 
-.form-label {
-  font-weight: 500;
-  margin-bottom: 10px;
-  display: block;
-  text-align: left;
-}
-
-/* 下拉选择框样式 */
-.salary-select,
-.time-select {
-  background-color: rgba(255, 255, 255, 0.1);
-  border: 1px solid rgba(255, 255, 255, 0.2);
-  border-radius: 8px;
-  color: #fff;
-  padding: 12px;
-  transition: all 0.3s ease;
-  appearance: none;
-  background-image: url("data:image/svg+xml;charset=UTF-8,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23ffffff' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3e%3cpolyline points='6 9 12 15 18 9'%3e%3c/polyline%3e%3c/svg%3e");
-  background-repeat: no-repeat;
-  background-position: right 12px center;
-  background-size: 16px;
-  cursor: pointer;
-  
-  &:focus {
-    background-color: rgba(255, 255, 255, 0.15);
-    border-color: var(--accent-color);
-    box-shadow: 0 0 0 3px rgba(0, 217, 255, 0.3);
-    outline: none;
-  }
-  
-  option {
-    background-color: #1a1a2e;
-    color: #fff;
-    padding: 10px;
-  }
-}
-
-/* 工作时长信息 */
 .work-hours-info {
   display: flex;
+  justify-content: space-between;
   align-items: center;
-  justify-content: center;
-  padding: 10px;
-  background-color: rgba(255, 255, 255, 0.08);
-  border-radius: 10px;
-  border: 1px solid rgba(255, 255, 255, 0.1);
-  margin-bottom: 15px;
-}
-
-.info-label {
-  font-weight: 500;
-  margin-right: 10px;
-}
-
-.info-value {
-  font-weight: 700;
-  font-size: 1.2rem;
-  color: var(--accent-color);
-}
-
-/* 时间选择器行容器 */
-.row {
-  display: flex;
-  flex-wrap: wrap;
-  margin-left: -10px;
-  margin-right: -10px;
-  margin-bottom: 15px;
-}
-
-.col-md-6 {
-  padding-left: 10px;
-  padding-right: 10px;
-  width: 50%;
-  flex: 0 0 auto;
+  
+  .info-value {
+    font-weight: 600;
+    color: var(--el-color-primary);
+  }
 }
 
 @media (max-width: 768px) {
-  .col-md-6 {
-    margin-bottom: 15px;
-    width: 100%;
+  .setup-form {
+    padding: 10px 0;
   }
 }
 </style> 

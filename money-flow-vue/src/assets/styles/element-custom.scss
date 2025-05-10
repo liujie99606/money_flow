@@ -1,0 +1,124 @@
+// Element Plus 自定义样式
+:root {
+  --el-color-primary: #409eff;
+  --el-color-primary-light-3: #79bbff;
+  --el-color-primary-light-5: #a0cfff;
+  --el-color-primary-light-7: #c6e2ff;
+  --el-color-primary-light-9: #ecf5ff;
+  --el-color-primary-dark-2: #337ecc;
+  --el-color-success: #67c23a;
+  --el-color-warning: #e6a23c;
+  --el-color-danger: #f56c6c;
+  --el-color-info: #909399;
+}
+
+// 暗色模式下的元素样式
+html.dark {
+  --el-color-primary: #5e9cf9;
+  --el-color-primary-light-3: #4a7cc9;
+  --el-color-primary-light-5: #366099;
+  --el-color-primary-light-7: #244066;
+  --el-color-primary-light-9: #121f33;
+  --el-color-primary-dark-2: #78adff;
+  --el-color-success: #85ce61;
+  --el-color-warning: #f0b94e;
+  --el-color-danger: #ff7875;
+  --el-color-info: #a6a9ad;
+  
+  // 背景色
+  --el-bg-color: #1a1a2e;
+  --el-bg-color-overlay: #1f1f3a;
+  
+  // 文本颜色
+  --el-text-color-primary: #e5e5e5;
+  --el-text-color-regular: #c0c0c0;
+  --el-text-color-secondary: #a0a0a0;
+  --el-text-color-placeholder: #606060;
+  
+  // 边框颜色
+  --el-border-color: #383867;
+  --el-border-color-light: #2c2c54;
+}
+
+// 全局样式调整
+.el-button {
+  border-radius: 8px;
+  font-weight: 500;
+  transition: all 0.3s ease;
+  
+  &.el-button--primary {
+    background: linear-gradient(45deg, var(--el-color-primary), var(--el-color-primary-light-3));
+    border: none;
+    box-shadow: 0 4px 12px rgba(94, 156, 249, 0.3);
+    
+    &:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 6px 16px rgba(94, 156, 249, 0.4);
+    }
+  }
+  
+  &.el-button--danger {
+    background: linear-gradient(45deg, var(--el-color-danger), #ff9b9b);
+    border: none;
+    box-shadow: 0 4px 12px rgba(245, 108, 108, 0.3);
+    
+    &:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 6px 16px rgba(245, 108, 108, 0.4);
+    }
+  }
+}
+
+.el-input,
+.el-select {
+  .el-input__wrapper {
+    border-radius: 8px;
+    transition: all 0.3s ease;
+    
+    &.is-focus {
+      box-shadow: 0 0 0 1px var(--el-color-primary) inset;
+    }
+  }
+}
+
+.el-card {
+  border-radius: 12px;
+  overflow: hidden;
+  transition: all 0.3s ease;
+  border: none;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.12);
+  
+  .el-card__header {
+    border-bottom: 1px solid var(--el-border-color-light);
+    padding: 16px 20px;
+  }
+  
+  &:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 12px 30px rgba(0, 0, 0, 0.15);
+  }
+}
+
+// 适配应用特定样式
+.glass-panel {
+  background: rgba(31, 31, 58, 0.7);
+  backdrop-filter: blur(10px);
+  border-radius: 16px;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+// 进度条样式
+.el-progress-bar__outer {
+  background-color: rgba(255, 255, 255, 0.1) !important;
+  border-radius: 15px !important;
+}
+
+.el-progress-bar__inner {
+  background: linear-gradient(45deg, var(--el-color-primary), var(--el-color-primary-light-3)) !important;
+  border-radius: 15px !important;
+}
+
+// 表单样式
+.el-form-item__label {
+  font-weight: 500;
+} 

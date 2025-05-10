@@ -3,7 +3,7 @@
   <div id="coins-container"></div>
 
   <div class="container">
-    <div class="glass-panel">
+    <el-card class="glass-panel">
       <h1 class="title animate__animated animate__fadeIn">🐎 牛马实时薪资计算器 💰</h1>
 
       <SetupForm v-if="!isRunning" @start-timer="startTimer" />
@@ -20,7 +20,7 @@
         :time-until-end="timeUntilEnd"
         @stop-timer="stopTimer"
       />
-    </div>
+    </el-card>
   </div>
 
   <footer class="text-center mt-4 py-3">
@@ -109,6 +109,7 @@ export default {
     // 初始化效果
     onMounted(() => {
       EffectsManager.applyPageAnimations();
+      document.documentElement.classList.add('dark'); // 启用暗色模式
     });
     
     return {
@@ -130,6 +131,50 @@ export default {
 
 <style lang="scss">
 @import '@/assets/styles/main.scss';
+
+.container {
+  max-width: 800px;
+  margin: 0 auto;
+  padding: 20px;
+}
+
+.glass-panel {
+  background: rgba(31, 31, 58, 0.7) !important;
+  backdrop-filter: blur(10px);
+  border-radius: 16px !important;
+  border: 1px solid rgba(255, 255, 255, 0.1) !important;
+  padding: 30px;
+  text-align: center;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2) !important;
+}
+
+.title {
+  font-size: 1.8rem;
+  margin-bottom: 30px;
+  background: linear-gradient(45deg, #fff, #a0cfff);
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+  text-shadow: 0 0 10px rgba(160, 207, 255, 0.5);
+}
+
+.github-link {
+  color: #a0a0a0;
+  text-decoration: none;
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  transition: all 0.3s ease;
+  
+  &:hover {
+    color: #fff;
+    transform: translateY(-2px);
+  }
+  
+  svg {
+    fill: currentColor;
+  }
+}
 
 @media (max-width: 768px) {
   .container {

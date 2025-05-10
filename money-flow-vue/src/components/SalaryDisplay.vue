@@ -5,38 +5,63 @@
       <div class="earning-value">¥{{ formattedEarnings }}</div>
     </div>
 
-    <div class="work-status-badge" :class="'status-' + workStatus">
+    <el-tag :type="workStatusTagType" size="large" class="work-status-tag">
       {{ workStatusText }}
-    </div>
+    </el-tag>
 
-    <div class="progress-container mb-3">
-      <div class="progress">
-        <div class="progress-bar progress-bar-striped progress-bar-animated"
-             :style="{ width: progressPercentage + '%' }"></div>
-      </div>
+    <div class="progress-container mb-4">
+      <el-progress 
+        :percentage="progressPercentage" 
+        :stroke-width="20"
+        :show-text="false"
+        :status="progressStatus"
+      />
       <div class="progress-text">{{ progressPercentage }}%</div>
     </div>
 
-    <div class="stats-grid">
-      <div class="stat-box">
-        <div class="stat-label">已工作时长</div>
-        <div class="stat-value">{{ formatTime(totalWorkedTime) }}</div>
-      </div>
-      <div class="stat-box">
-        <div class="stat-label">下班倒计时</div>
-        <div class="stat-value">{{ formatTime(timeUntilEnd) }}</div>
-      </div>
-      <div class="stat-box">
-        <div class="stat-label">每秒收入</div>
-        <div class="stat-value">¥{{ perSecondRate.toFixed(4) }}/秒</div>
-      </div>
-      <div class="stat-box">
-        <div class="stat-label">预计总收入</div>
-        <div class="stat-value">¥{{ totalExpectedEarnings.toFixed(2) }}</div>
-      </div>
-    </div>
+    <el-row :gutter="12">
+      <el-col :span="12" :xs="24">
+        <el-card shadow="hover" class="stat-card">
+          <template #header>
+            <div class="stat-header">已工作时长</div>
+          </template>
+          <div class="stat-value">{{ formatTime(totalWorkedTime) }}</div>
+        </el-card>
+      </el-col>
+      <el-col :span="12" :xs="24">
+        <el-card shadow="hover" class="stat-card">
+          <template #header>
+            <div class="stat-header">下班倒计时</div>
+          </template>
+          <div class="stat-value">{{ formatTime(timeUntilEnd) }}</div>
+        </el-card>
+      </el-col>
+      <el-col :span="12" :xs="24">
+        <el-card shadow="hover" class="stat-card">
+          <template #header>
+            <div class="stat-header">每秒收入</div>
+          </template>
+          <div class="stat-value">¥{{ perSecondRate.toFixed(4) }}/秒</div>
+        </el-card>
+      </el-col>
+      <el-col :span="12" :xs="24">
+        <el-card shadow="hover" class="stat-card">
+          <template #header>
+            <div class="stat-header">预计总收入</div>
+          </template>
+          <div class="stat-value">¥{{ totalExpectedEarnings.toFixed(2) }}</div>
+        </el-card>
+      </el-col>
+    </el-row>
 
-    <button @click="stopTimer" class="btn btn-danger btn-glow mt-4">下班</button>
+    <el-button 
+      type="danger" 
+      @click="stopTimer" 
+      class="w-100"
+      size="large"
+    >
+      下班
+    </el-button>
   </div>
 </template>
 
@@ -105,6 +130,28 @@ export default {
       }
     });
     
+    // 工作状态对应的Tag类型
+    const workStatusTagType = computed(() => {
+      switch(props.workStatus) {
+        case 'before_work':
+          return 'warning';
+        case 'working':
+          return 'success';
+        case 'after_work':
+          return 'info';
+        default:
+          return 'info';
+      }
+    });
+    
+    // 进度条状态
+    const progressStatus = computed(() => {
+      if (props.progressPercentage >= 100) {
+        return 'success';
+      }
+      return '';
+    });
+    
     // 总的已工作时间（包括初始已工作时间和计时器记录的时间）
     const totalWorkedTime = computed(() => {
       return new Decimal(props.initialWorkedSeconds).plus(props.elapsedTime).toNumber();
@@ -123,6 +170,8 @@ export default {
     return {
       formattedEarnings,
       workStatusText,
+      workStatusTagType,
+      progressStatus,
       totalWorkedTime,
       stopTimer,
       formatTime
@@ -136,14 +185,26 @@ export default {
   padding: 20px 0;
 }
 
+.w-100 {
+  width: 100%;
+}
+
+.mb-2 {
+  margin-bottom: 8px;
+}
+
+.mb-4 {
+  margin-bottom: 16px;
+}
+
 .earning-value {
-  font-size: 4rem;
+  font-size: 3.5rem;
   font-weight: bold;
   margin: 5px 0 20px;
-  color: #ffde59;
   background: linear-gradient(45deg, #ffde59, #ff914d);
   -webkit-background-clip: text;
   background-clip: text;
+  color: transparent;
   text-shadow: 0 0 20px rgba(255, 222, 89, 0.5);
   transition: all 0.3s ease;
   animation: pulse 2s infinite;
@@ -161,22 +222,15 @@ export default {
   }
 }
 
+.work-status-tag {
+  margin-bottom: 16px;
+  padding: 8px 16px;
+  font-weight: 600;
+}
+
 .progress-container {
   position: relative;
   margin: 20px 0;
-}
-
-.progress {
-  background-color: rgba(255, 255, 255, 0.1);
-  border-radius: 15px;
-  overflow: hidden;
-  height: 20px;
-}
-
-.progress-bar {
-  background: linear-gradient(45deg, var(--primary-color), var(--accent-color));
-  transition: width 0.5s ease;
-  height: 100%;
 }
 
 .progress-text {
@@ -186,68 +240,46 @@ export default {
   transform: translate(-50%, -50%);
   font-weight: bold;
   text-shadow: 0 0 3px rgba(0, 0, 0, 0.5);
+  color: #fff;
 }
 
-.stats-grid {
-  display: grid;
-  grid-template-columns: repeat(2, 1fr);
-  gap: 12px;
-  margin-top: 20px;
-}
-
-.stat-box {
-  background: rgba(255, 255, 255, 0.1);
-  border-radius: 10px;
-  padding: 10px 8px;
-  border: 1px solid rgba(255, 255, 255, 0.1);
+.stat-card {
+  margin-bottom: 16px;
   transition: all 0.3s ease;
   
   &:hover {
     transform: translateY(-5px);
-    box-shadow: 0 10px 20px rgba(0, 0, 0, 0.2);
-    border-color: var(--accent-color);
+  }
+  
+  .el-card__header {
+    padding: 10px;
   }
 }
 
-.stat-label {
+.stat-header {
   font-size: 0.9rem;
   opacity: 0.8;
-  margin-bottom: 5px;
+  font-weight: 500;
 }
 
 .stat-value {
   font-size: 1.4rem;
   font-weight: 600;
-}
-
-.work-status-badge {
-  display: inline-block;
-  padding: 5px 15px;
-  border-radius: 20px;
-  font-weight: 600;
-  font-size: 0.9rem;
-  margin-bottom: 15px;
-  
-  &.status-working {
-    background: linear-gradient(45deg, #4CAF50, #8BC34A);
-  }
-  
-  &.status-before_work {
-    background: linear-gradient(45deg, #FF9800, #FFC107);
-  }
-  
-  &.status-after_work {
-    background: linear-gradient(45deg, #2196F3, #03A9F4);
-  }
+  padding: 10px;
 }
 
 @media (max-width: 768px) {
-  .stats-grid {
-    grid-template-columns: 1fr;
-  }
-
   .earning-value {
     font-size: 2.5rem;
+    margin-bottom: 15px;
+  }
+  
+  .stat-value {
+    font-size: 1.2rem;
+  }
+  
+  .salary-display {
+    padding: 10px 0;
   }
 }
 </style> 
